@@ -72,14 +72,14 @@ public class SpringSecurity {
                         // ADMIN
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // PROTECTED
+                        // USER
                         .requestMatchers("/user/**").authenticated()
 
-                        // EVERYTHING ELSE PROTECTED
+                        // EVERYTHING ELSE
                         .anyRequest().permitAll()
                 )
 
-                // ✅ FIX: Return 401 instead of redirecting to Google
+                // RETURN 401 INSTEAD OF REDIRECT
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -88,13 +88,23 @@ public class SpringSecurity {
                         })
                 )
 
-                // OAuth needs session
+                // SESSION REQUIRED FOR OAUTH
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
 
-                // OAuth2 Login
+                // 🔥 FIXED OAUTH CONFIG
                 .oauth2Login(oauth -> oauth
+
+                        // ✅ FORCE CORRECT BASE URI WITH CONTEXT PATH
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/journal/oauth2/authorization")
+                        )
+
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/journal/login/oauth2/code/*")
+                        )
+
                         .successHandler((request, response, authentication) -> {
 
                             System.out.println("🔥 GOOGLE LOGIN SUCCESS");
@@ -107,15 +117,15 @@ public class SpringSecurity {
                             System.out.println("EMAIL: " + email);
                             System.out.println("NAME: " + name);
 
-                            // Save or fetch user
+                            // SAVE USER
                             userService.processOAuthPostLogin(email, name);
 
-                            // Generate JWT
+                            // GENERATE JWT
                             String token = jwtUtil.generateToken(email);
 
                             System.out.println("🔥 JWT TOKEN: " + token);
 
-                            // Return token
+                            // RETURN TOKEN
                             response.setContentType("application/json");
                             response.getWriter().write("{\"token\": \"" + token + "\"}");
                         })
