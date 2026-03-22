@@ -1,0 +1,58 @@
+#spring:
+#  data:
+#    mongodb:
+#      uri: mongodb+srv://dpkwork123_db_user:HKdVn2NqWUn49P1s@cluster0.vc9lvcg.mongodb.net/journaldb?retryWrites=true&w=majority&appName=Cluster0
+#      database: journaldb
+#      auto-index-creation: true
+#
+#server:
+#  port: 8080
+#  servlet:
+#    context-path: /journal
+
+
+
+
+spring:
+  profiles:
+    active: dev
+# prod daldo and usme  8081 likhdo  to wo chalega
+#  comma lagake dono likh skte hai dono chlaega
+
+
+logging:
+  level:
+    net:
+      engineeringdigest:
+        journalApp: DEBUG
+
+
+#
+#logging:
+#  level:
+#    root: ERROR
+
+
+#iske wajah se sirf sprin ka logo print hoga and also error wala part
+
+
+#logging:
+#  level:
+#    net:
+#      engineeringdigest:
+#        journalApp:
+#          service:
+#            UserService: OFF
+#    isse uss particular pakage ke logs band hojayenge jiske aapko nhi chahiye  jaise idhar service hai
+
+
+#weather:
+#  api:
+#    key:
+#      496bc488ae8e1a228ff9e3d1b28a6c77
+
+#or
+
+#weather_api_key:496bc488ae8e1a228ff9e3d1b28a6c77
+
+
