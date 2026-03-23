@@ -42,3 +42,12 @@ spring:
 weather:
   api:
     key: 5c41ec298e9621062e1eade751bd6001
+
+    spring:
+      mail:
+        properties:
+          mail:
+            smtp:
+              connectiontimeout: 5000
+              timeout: 5000
+              writetimeout: 5000
