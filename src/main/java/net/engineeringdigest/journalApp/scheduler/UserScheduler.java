@@ -27,10 +27,10 @@ public class UserScheduler {
     private UserService userService;
 
     // every 5 minutes
-   // @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
    // @Scheduled(cron = "0 0/30 * * * *")
 
-    @Scheduled(cron = "0 0 9 ? * SUN")
+   // @Scheduled(cron = "0 0 9 ? * SUN")
     public void sendWeeklySentimentEmail() {
 
         System.out.println("CRON IS RUNNING...");
