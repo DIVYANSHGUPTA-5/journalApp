@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +46,11 @@ public class JournalEntryService {
         }
 
         JournalEntry saved = journalEntryRepository.save(journalEntry);
+
+        // 🔥 FIX: prevent NullPointerException
+        if (user.getJournalEntries() == null) {
+            user.setJournalEntries(new ArrayList<>());
+        }
 
         user.getJournalEntries().add(saved);
         userService.saveUser(user);
@@ -105,7 +111,11 @@ public class JournalEntryService {
             User user = userService.findByUserName(userName);
 
             if (user != null) {
-                user.getJournalEntries().removeIf(e -> e.getId().equals(id));
+
+                if (user.getJournalEntries() != null) {
+                    user.getJournalEntries().removeIf(e -> e.getId().equals(id));
+                }
+
                 userService.saveUser(user);
             }
 
