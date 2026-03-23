@@ -32,6 +32,7 @@ public class PublicController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private EmailService emailService;
 
@@ -45,18 +46,20 @@ public class PublicController {
         return ResponseEntity.ok("OK");
     }
 
-
-
+    // ✅ TEST MAIL (CLEAN VERSION)
     @GetMapping("/test-mail")
-    public String sendTestMail() {
+    public ResponseEntity<String> sendTestMail() {
+
+        String testEmail = "dpkwork123@gmail.com"; // you can change this if needed
+
         emailService.sendEmail(
-                "dpkwork123@gmail.com",  // 👈 put your real email here
+                testEmail,
                 "Test Mail",
                 "Email working 🚀"
         );
-        return "Mail sent";
-    }
 
+        return ResponseEntity.ok("Mail sent to " + testEmail);
+    }
 
     // ✅ Signup
     @PostMapping("/signup")
@@ -66,9 +69,6 @@ public class PublicController {
         newUser.setEmail(userDTO.getEmail());
         newUser.setUserName(userDTO.getUserName());
         newUser.setPassword(userDTO.getPassword());
-
-        // ✅ FIXED LINE
-
 
         boolean saved = userService.saveNewUser(newUser);
 
