@@ -10,16 +10,20 @@ spring:
       auto-index-creation: true
 
   mail:
-    host: sandbox.smtp.mailtrap.io
-    port: 2525
-    username: 8735639b23a821
-    password: 633b72bb2d1a5a
+    host: smtp.gmail.com
+    port: 587
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   security:
     oauth2:
       client:
@@ -37,16 +41,6 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: sub
 
-
 weather:
   api:
     key: 5c41ec298e9621062e1eade751bd6001
-
-    spring:
-      mail:
-        properties:
-          mail:
-            smtp:
-              connectiontimeout: 5000
-              timeout: 5000
-              writetimeout: 5000
