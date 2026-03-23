@@ -17,7 +17,7 @@ public class JournalEntry {
     @Id
     private ObjectId id;
 
-    private String userName;   // ✅ CRITICAL FIX (link entry → user)
+    private String userName;
 
     private String title;
     private String content;

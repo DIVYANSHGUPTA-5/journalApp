@@ -23,13 +23,11 @@ public class JournalEntryController {
     @Autowired
     private JournalEntryService journalEntryService;
 
-    // ✅ TEST
     @GetMapping("/ping")
     public String ping() {
         return "OK";
     }
 
-    // ✅ GET ALL USER ENTRIES
     @GetMapping
     public ResponseEntity<?> getALLJournalEntriesOfUser() {
 
@@ -44,7 +42,6 @@ public class JournalEntryController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // ✅ CREATE ENTRY
     @PostMapping
     public ResponseEntity<?> createEntry(@RequestBody JournalEntry myEntry) {
 
@@ -56,11 +53,11 @@ public class JournalEntryController {
             return new ResponseEntity<>(myEntry, HttpStatus.CREATED);
 
         } catch (Exception e) {
-            return new ResponseEntity<>("Error creating entry", HttpStatus.BAD_REQUEST);
+            e.printStackTrace(); // 🔥 IMPORTANT DEBUG
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-    // ✅ GET BY ID
     @GetMapping("/id/{myId}")
     public ResponseEntity<?> getJournalEntryById(@PathVariable ObjectId myId) {
 
@@ -75,7 +72,6 @@ public class JournalEntryController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // ✅ DELETE
     @DeleteMapping("/id/{myId}")
     public ResponseEntity<?> deleteJournalEntryById(@PathVariable ObjectId myId) {
 
@@ -90,21 +86,18 @@ public class JournalEntryController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // ✅ UPDATE (FIXED PROPERLY 🔥)
     @PutMapping("/id/{myId}")
     public ResponseEntity<?> updateJournalById(@PathVariable ObjectId myId,
                                                @RequestBody JournalEntry newEntry) {
 
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        System.out.println("AUTH USER: " + userName);
-
         try {
             JournalEntry updated = journalEntryService.updateEntry(myId, newEntry, userName);
             return new ResponseEntity<>(updated, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
 }
