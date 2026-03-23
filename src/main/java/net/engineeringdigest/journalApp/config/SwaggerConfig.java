@@ -26,7 +26,7 @@ public class SwaggerConfig {
                 )
                 // ✅ FIXED SERVER URL
                 .servers(Arrays.asList(
-                        new Server().url("http://localhost:8080/journal").description("Local Server")
+                        new Server().url("https://journalapp-1-ne46.onrender.com").description("Production Server")
                 ))
                 .tags(Arrays.asList(
                         new Tag().name("Public APIs"),
