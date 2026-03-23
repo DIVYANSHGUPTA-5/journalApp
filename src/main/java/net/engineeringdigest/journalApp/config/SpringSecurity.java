@@ -59,7 +59,7 @@ public class SpringSecurity {
                         .requestMatchers("/public/**").permitAll()
 
                         // OAUTH
-                        .requestMatchers("/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
                         // SWAGGER
                         .requestMatchers(
