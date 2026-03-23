@@ -4,7 +4,7 @@ import net.engineeringdigest.journalApp.entity.JournalEntry;
 import net.engineeringdigest.journalApp.entity.User;
 import net.engineeringdigest.journalApp.enums.Sentiment;
 import net.engineeringdigest.journalApp.repository.JournalEntryRepository;
-import org.bson.types.ObjectId;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,40 +25,51 @@ public class JournalEntryService {
     @Autowired
     private SentimentAnalysisService sentimentAnalysisService;
 
+    // ✅ CREATE ENTRY
     @Transactional
-    public void saveEntry(JournalEntry journalEntry, String userName) {
+    public JournalEntry saveEntry(JournalEntry journalEntry, String userName) {
 
-        User freshUser = userService.findByUserName(userName);
+        User user = userService.findByUserName(userName);
 
-        if (freshUser == null) {
+        if (user == null) {
             throw new RuntimeException("User not found");
         }
 
         journalEntry.setUserName(userName);
         journalEntry.setDate(LocalDateTime.now());
 
-        // 🔥 SAFE SENTIMENT (NO NEUTRAL)
-        try {
-            if (journalEntry.getContent() != null && !journalEntry.getContent().isEmpty()) {
-                Sentiment sentiment = sentimentAnalysisService
-                        .analyzeSentiment(journalEntry.getContent());
-
-                if (sentiment != null) {
-                    journalEntry.setSentiment(sentiment);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Sentiment failed: " + e.getMessage());
+        if (journalEntry.getContent() != null) {
+            Sentiment sentiment = sentimentAnalysisService
+                    .analyzeSentiment(journalEntry.getContent());
+            journalEntry.setSentiment(sentiment);
         }
 
-        JournalEntry savedEntry = journalEntryRepository.save(journalEntry);
+        JournalEntry saved = journalEntryRepository.save(journalEntry);
 
-        freshUser.getJournalEntries().add(savedEntry);
-        userService.saveUser(freshUser);
+        user.getJournalEntries().add(saved);
+        userService.saveUser(user);
+
+        return saved;
     }
 
+    // ✅ FIND BY USERNAME
+    public List<JournalEntry> findByUserName(String userName) {
+        return journalEntryRepository.findByUserName(userName);
+    }
+
+    // ✅ SAFE GET BY ID
+    public Optional<JournalEntry> getEntryByIdForUser(String id, String userName) {
+        Optional<JournalEntry> entry = journalEntryRepository.findById(id);
+
+        if (entry.isPresent() && userName.equals(entry.get().getUserName())) {
+            return entry;
+        }
+        return Optional.empty();
+    }
+
+    // ✅ UPDATE
     @Transactional
-    public JournalEntry updateEntry(ObjectId id, JournalEntry newEntry, String userName) {
+    public JournalEntry updateEntry(String id, JournalEntry newEntry, String userName) {
 
         JournalEntry existing = journalEntryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Entry not found"));
@@ -74,52 +85,34 @@ public class JournalEntryService {
         if (newEntry.getContent() != null && !newEntry.getContent().isEmpty()) {
             existing.setContent(newEntry.getContent());
 
-            try {
-                Sentiment sentiment = sentimentAnalysisService
-                        .analyzeSentiment(newEntry.getContent());
+            Sentiment sentiment = sentimentAnalysisService
+                    .analyzeSentiment(newEntry.getContent());
 
-                if (sentiment != null) {
-                    existing.setSentiment(sentiment);
-                }
-            } catch (Exception e) {
-                System.out.println("Sentiment failed");
-            }
+            existing.setSentiment(sentiment);
         }
 
         return journalEntryRepository.save(existing);
     }
 
-    public List<JournalEntry> getAll() {
-        return journalEntryRepository.findAll();
-    }
-
-    public Optional<JournalEntry> findById(ObjectId id) {
-        return journalEntryRepository.findById(id);
-    }
-
+    // ✅ DELETE
     @Transactional
-    public boolean deleteById(ObjectId id, String userName) {
-
-        User freshUser = userService.findByUserName(userName);
-
-        if (freshUser == null) return false;
+    public boolean deleteById(String id, String userName) {
 
         Optional<JournalEntry> entry = journalEntryRepository.findById(id);
 
         if (entry.isPresent() && userName.equals(entry.get().getUserName())) {
 
-            freshUser.getJournalEntries().removeIf(e -> e.getId().equals(id));
-            userService.saveUser(freshUser);
+            User user = userService.findByUserName(userName);
+
+            if (user != null) {
+                user.getJournalEntries().removeIf(e -> e.getId().equals(id));
+                userService.saveUser(user);
+            }
 
             journalEntryRepository.deleteById(id);
-
             return true;
         }
 
         return false;
-    }
-
-    public List<JournalEntry> findByUserName(String userName) {
-        return journalEntryRepository.findByUserName(userName);
     }
 }

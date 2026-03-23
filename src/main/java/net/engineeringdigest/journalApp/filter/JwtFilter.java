@@ -43,26 +43,25 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String jwt = authorizationHeader.substring(7);
-        String username = null;
-
-        System.out.println("JWT: " + jwt);
+        String username;
 
         try {
             username = jwtUtil.extractUsername(jwt);
             System.out.println("USERNAME: " + username);
         } catch (Exception e) {
-            System.out.println("JWT extraction failed");
+            System.out.println("JWT extraction failed ❌");
             chain.doFilter(request, response);
             return;
         }
 
+        // ✅ MAIN AUTH BLOCK
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             System.out.println("UserDetails loaded: " + userDetails.getUsername());
 
-            // ✅ FIXED VALIDATION
+            // ✅ CORRECT VALIDATION (FINAL FIX)
             if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
 
                 System.out.println("JWT VALID ✅");

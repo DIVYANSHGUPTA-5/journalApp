@@ -26,16 +26,16 @@ public class UserScheduler {
     @Autowired
     private UserService userService;
 
-    //Runs every minute (for testing)
-   // @Scheduled(cron = "0 * * * * *")
+    // every 5 minutes
+   // @Scheduled(cron = "0 */1 * * * *")
+   // @Scheduled(cron = "0 0/30 * * * *")
 
-   @Scheduled(cron = "0 0 9 ? * SUN")// sunday
+    @Scheduled(cron = "0 0 9 ? * SUN")
     public void sendWeeklySentimentEmail() {
 
         System.out.println("CRON IS RUNNING...");
         System.out.println("TIME: " + LocalDateTime.now());
 
-        // ✅ CONFIG-BASED AUTOMATION
         Map<Sentiment, String> emailMessages = Map.of(
                 Sentiment.SAD, "We noticed you're feeling low 💙 Take care ❤️",
                 Sentiment.ANXIOUS, "Try to relax. You’re doing great 💛",
@@ -48,8 +48,10 @@ public class UserScheduler {
 
         for (User user : users) {
 
-            List<JournalEntry> entries = journalEntryService.findByUserName(user.getUserName());
+            List<JournalEntry> entries =
+                    journalEntryService.findByUserName(user.getUserName());
 
+            System.out.println("USER: " + user.getUserName());
             System.out.println("ALL ENTRIES: " + entries);
 
             if (entries == null || entries.isEmpty()) {
@@ -57,14 +59,20 @@ public class UserScheduler {
                 continue;
             }
 
-            // ✅ GET LATEST ENTRY (CURRENT FEELING)
-            JournalEntry latestEntry = entries.stream()
-                    .filter(entry -> entry.getDate() != null)
-                    .max(Comparator.comparing(JournalEntry::getDate))
-                    .orElse(null);
+            // 🔥🔥🔥 FIX: STRICT SORT (LATEST FIRST)
+            entries = entries.stream()
+                    .filter(e -> e.getDate() != null)
+                    .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
+                    .toList();
 
-            if (latestEntry == null || latestEntry.getSentiment() == null) {
-                System.out.println("No valid latest sentiment for user: " + user.getUserName());
+            // 🔥 ALWAYS PICK LATEST (INDEX 0)
+            JournalEntry latestEntry = entries.get(0);
+
+            System.out.println("LATEST ENTRY: " + latestEntry.getContent());
+            System.out.println("LATEST DATE: " + latestEntry.getDate());
+
+            if (latestEntry.getSentiment() == null) {
+                System.out.println("No sentiment for user: " + user.getUserName());
                 continue;
             }
 
@@ -72,10 +80,11 @@ public class UserScheduler {
 
             System.out.println("CURRENT SENTIMENT: " + currentSentiment);
 
-            // ✅ AUTOMATED RULE BASED ON CURRENT FEELING
             if (emailMessages.containsKey(currentSentiment)) {
 
                 String message = emailMessages.get(currentSentiment);
+
+                System.out.println("EMAIL METHOD CALLED TO: " + user.getEmail());
 
                 emailService.sendEmail(
                         user.getEmail(),
@@ -83,7 +92,8 @@ public class UserScheduler {
                         message
                 );
 
-                System.out.println("Email sent for CURRENT mood: " + currentSentiment + " → " + user.getEmail());
+                System.out.println("Email sent for CURRENT mood: "
+                        + currentSentiment + " → " + user.getEmail());
             }
         }
     }

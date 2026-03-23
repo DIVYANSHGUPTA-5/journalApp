@@ -24,6 +24,10 @@ public class SwaggerConfig {
                                 .description("By DIVYANSH KUMAR")
                                 .version("1.0")
                 )
+                //localhost pr kaam krna ho tab ye
+//                .servers(Arrays.asList(
+//                        new Server().url("http://localhost:8080").description("Local Server")
+//                ))
                 // ✅ FIXED SERVER URL
                 .servers(Arrays.asList(
                         new Server().url("https://journalapp-1-ne46.onrender.com").description("Production Server")
