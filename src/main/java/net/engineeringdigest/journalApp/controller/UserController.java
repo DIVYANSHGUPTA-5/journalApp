@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +26,18 @@ public class UserController {
     @Autowired
     private WeatherService weatherService;
 
+    // ✅ COMMON METHOD (IMPORTANT)
+    private String getLoggedInEmail() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth.getPrincipal() instanceof OAuth2User) {
+            OAuth2User oAuth2User = (OAuth2User) auth.getPrincipal();
+            return oAuth2User.getAttribute("email");
+        } else {
+            return auth.getName();
+        }
+    }
+
     // CREATE USER
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
@@ -36,10 +49,7 @@ public class UserController {
     @PutMapping
     public ResponseEntity<?> updateUser(@RequestBody User user) {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        String userName = authentication.getName();
+        String userName = getLoggedInEmail();
 
         User userInDb = userService.findByUserName(userName);
 
@@ -59,10 +69,9 @@ public class UserController {
     @DeleteMapping
     public ResponseEntity<?> deleteUser() {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        String userName = getLoggedInEmail();
 
-        userRepository.deleteByUserName(authentication.getName());
+        userRepository.deleteByUserName(userName);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -71,8 +80,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> greeting() {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        String userName = getLoggedInEmail();
 
         WeatherResponse weatherResponse =
                 weatherService.getWeather("Mumbai");
@@ -87,7 +95,7 @@ public class UserController {
         }
 
         return new ResponseEntity<>(
-                "Hi " + authentication.getName() + greeting,
+                "Hi " + userName + greeting,
                 HttpStatus.OK
         );
     }
