@@ -58,7 +58,7 @@ public class SpringSecurity {
                         // PUBLIC
                         .requestMatchers("/public/**").permitAll()
 
-                        // OAUTH (IMPORTANT)
+                        // OAUTH (MUST BE PUBLIC)
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
                         // SWAGGER
@@ -75,8 +75,8 @@ public class SpringSecurity {
                         // USER
                         .requestMatchers("/user/**").authenticated()
 
-                        // EVERYTHING ELSE
-                        .anyRequest().permitAll()
+                        // 🔥 FINAL SECURITY (IMPORTANT)
+                        .anyRequest().authenticated()
                 )
 
                 // RETURN 401 INSTEAD OF REDIRECT
@@ -93,7 +93,7 @@ public class SpringSecurity {
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
 
-                // ✅ CLEAN OAUTH (NO baseUri override)
+                // CLEAN OAUTH (NO OVERRIDE)
                 .oauth2Login(oauth -> oauth
                         .successHandler((request, response, authentication) -> {
 
