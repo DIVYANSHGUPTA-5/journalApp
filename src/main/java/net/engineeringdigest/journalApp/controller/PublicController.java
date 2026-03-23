@@ -15,7 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,6 +42,18 @@ public class PublicController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    // ✅ COMMON METHOD (IMPORTANT)
+    private String getLoggedInEmail() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth.getPrincipal() instanceof OAuth2User) {
+            OAuth2User oAuth2User = (OAuth2User) auth.getPrincipal();
+            return oAuth2User.getAttribute("email");
+        } else {
+            return auth.getName();
+        }
+    }
+
     // ✅ Health check
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
@@ -46,19 +61,26 @@ public class PublicController {
         return ResponseEntity.ok("OK");
     }
 
-    // ✅ TEST MAIL (CLEAN VERSION)
+    // ✅ TEST MAIL (NO HARDCODE — FINAL)
     @GetMapping("/test-mail")
     public ResponseEntity<String> sendTestMail() {
 
-        String testEmail = "dpkwork123@gmail.com"; // you can change this if needed
+        String email = getLoggedInEmail();
+
+        User user = userService.findByUserName(email);
+
+        if (user == null || user.getEmail() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User email not found");
+        }
 
         emailService.sendEmail(
-                testEmail,
+                user.getEmail(),
                 "Test Mail",
                 "Email working 🚀"
         );
 
-        return ResponseEntity.ok("Mail sent to " + testEmail);
+        return ResponseEntity.ok("Mail sent to " + user.getEmail());
     }
 
     // ✅ Signup
