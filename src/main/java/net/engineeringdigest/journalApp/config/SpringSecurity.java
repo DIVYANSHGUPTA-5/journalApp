@@ -58,7 +58,7 @@ public class SpringSecurity {
                         // PUBLIC
                         .requestMatchers("/public/**").permitAll()
 
-                        // OAUTH
+                        // OAUTH (IMPORTANT)
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
                         // SWAGGER
@@ -93,37 +93,20 @@ public class SpringSecurity {
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
 
-                // 🔥 FIXED OAUTH CONFIG
+                // ✅ CLEAN OAUTH (NO baseUri override)
                 .oauth2Login(oauth -> oauth
-
-                        // ✅ FORCE CORRECT BASE URI WITH CONTEXT PATH
-                        .authorizationEndpoint(authorization -> authorization
-                                .baseUri("/journal/oauth2/authorization")
-                        )
-
-                        .redirectionEndpoint(redirection -> redirection
-                                .baseUri("/journal/login/oauth2/code/*")
-                        )
-
                         .successHandler((request, response, authentication) -> {
-
-                            System.out.println("🔥 GOOGLE LOGIN SUCCESS");
 
                             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
                             String email = oAuth2User.getAttribute("email");
                             String name = oAuth2User.getAttribute("name");
 
-                            System.out.println("EMAIL: " + email);
-                            System.out.println("NAME: " + name);
-
                             // SAVE USER
                             userService.processOAuthPostLogin(email, name);
 
                             // GENERATE JWT
                             String token = jwtUtil.generateToken(email);
-
-                            System.out.println("🔥 JWT TOKEN: " + token);
 
                             // RETURN TOKEN
                             response.setContentType("application/json");
