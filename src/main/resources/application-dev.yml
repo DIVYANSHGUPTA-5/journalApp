@@ -1,19 +1,34 @@
-spring:
-  redis:
-    host: localhost
-    port: 6379
+# Local development configuration.
+# This is a LOCAL-ONLY application: everything runs on this machine (MongoDB + Redis on localhost).
+#
+# No secrets live in this file. Put them in ./config/application-dev.yml (git-ignored; see
+# config/application-dev.yml.example) or in environment variables - environment variables override files.
+# Settings with a ${NAME:default} placeholder can be overridden through that environment variable.
 
+server:
+  port: 8080
+
+spring:
   data:
     mongodb:
-      uri: ${MONGO_URI}
-      database: journaldb
+      # Local MongoDB, no authentication.
+      # Override with the SPRING_DATA_MONGODB_URI / SPRING_DATA_MONGODB_DATABASE environment variables.
+      uri: mongodb://localhost:27017
+      # A fresh database for this local-only app. The older local "journaldb" holds legacy users without an
+      # e-mail, which break the unique e-mail index (E11000 ... email dup key: { email: null }), so it is left
+      # untouched. To reuse it, first remove/repair those legacy users, then set this back to journaldb.
+      database: journaldb_local
       auto-index-creation: true
+    redis:
+      host: localhost
+      port: 6379
 
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
+    # Optional. Empty = e-mail sending is not configured (EmailService logs the failure and carries on).
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -29,8 +44,10 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            # Optional. The "not-configured" placeholders only let the app start without Google credentials;
+            # "Login with Google" works once real values are set (see README.md).
+            client-id: ${GOOGLE_CLIENT_ID:not-configured}
+            client-secret: ${GOOGLE_CLIENT_SECRET:not-configured}
             scope:
               - email
               - profile
@@ -43,4 +60,8 @@ spring:
 
 weather:
   api:
-    key: 5c41ec298e9621062e1eade751bd6001
+    # weatherstack access key. Set WEATHER_API_KEY, or weather.api.key in ./config/application-dev.yml.
+    key: ${WEATHER_API_KEY:}
+
+# jwt.secret (REQUIRED, at least 32 characters) is intentionally not defined here:
+# set JWT_SECRET, or jwt.secret in ./config/application-dev.yml.

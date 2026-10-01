@@ -1,0 +1,41 @@
+# Template for ./config/application-dev.yml  (that file is git-ignored - never commit the real one).
+#
+#   cp config/application-dev.yml.example config/application-dev.yml
+#
+# Spring Boot loads ./config/application-dev.yml automatically (IntelliJ and ./mvnw spring-boot:run both
+# start the app from the project root). Environment variables override anything set here.
+
+# REQUIRED - signs login tokens (HS256). At least 32 characters; generate one with:  openssl rand -base64 32
+# Environment variable alternative: JWT_SECRET
+jwt:
+  secret: ""
+
+# OPTIONAL - weatherstack access key used by the weather greeting.
+# Environment variable alternative: WEATHER_API_KEY
+weather:
+  api:
+    key: ""
+
+# OPTIONAL - uncomment only what you need (keep a single top-level "spring:" key).
+#
+# spring:
+#   # E-mail via Gmail + an App Password.            env alternatives: MAIL_USERNAME / MAIL_PASSWORD
+#   mail:
+#     username: "you@gmail.com"
+#     password: "<gmail-app-password>"
+#
+#   # "Login with Google". In Google Cloud Console add http://localhost:8080/login/oauth2/code/google as an
+#   # authorised redirect URI.                        env alternatives: GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET
+#   security:
+#     oauth2:
+#       client:
+#         registration:
+#           google:
+#             client-id: "..."
+#             client-secret: "..."
+#
+#   # A different MongoDB, e.g. a local replica set.  env alternatives: SPRING_DATA_MONGODB_URI / SPRING_DATA_MONGODB_DATABASE
+#   data:
+#     mongodb:
+#       uri: "mongodb://localhost:27017/?replicaSet=rs0"
+#       database: journaldb_local

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,10 @@ import java.util.Arrays;
 
 @Configuration
 public class SwaggerConfig {
+
+    // Port the local server listens on (server.port, default 8080) - used for the Swagger server URL.
+    @Value("${server.port:8080}")
+    private int serverPort;
 
     @Bean
     public OpenAPI myCustomConfig() {
@@ -24,13 +29,8 @@ public class SwaggerConfig {
                                 .description("By DIVYANSH KUMAR")
                                 .version("1.0")
                 )
-                //localhost pr kaam krna ho tab ye
-//                .servers(Arrays.asList(
-//                        new Server().url("http://localhost:8080").description("Local Server")
-//                ))
-                // ✅ FIXED SERVER URL
                 .servers(Arrays.asList(
-                        new Server().url("https://journalapp-1-ne46.onrender.com").description("Production Server")
+                        new Server().url("http://localhost:" + serverPort).description("Local Server")
                 ))
                 .tags(Arrays.asList(
                         new Tag().name("Public APIs"),

@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -15,11 +16,22 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    // ✅ Use strong & consistent key (must be >= 32 chars)
-    private static final String SECRET_KEY = "TaK+HaV^uvCHEFsEVfypW#7g9^k*Z8$V";
+    private final SecretKey signingKey;
+
+    // The signing key comes from configuration (JWT_SECRET env var, or jwt.secret in
+    // ./config/application-dev.yml) - never from source code. HS256 needs at least 32 bytes.
+    public JwtUtil(@Value("${jwt.secret:}") String secret) {
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException(
+                    "jwt.secret is missing or shorter than 32 bytes. Set the JWT_SECRET environment variable "
+                            + "or jwt.secret in config/application-dev.yml (see config/application-dev.yml.example).");
+        }
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return signingKey;
     }
 
     // 🔹 Extract username

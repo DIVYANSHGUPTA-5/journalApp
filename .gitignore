@@ -36,3 +36,7 @@ notes.md
 
 *.log
 
+### Local-only secrets/config - never commit (only the *.example templates are tracked) ###
+/config/*
+!/config/*.example
+
