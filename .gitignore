@@ -40,3 +40,4 @@ notes.md
 /config/*
 !/config/*.example
 
+.DS_Store
